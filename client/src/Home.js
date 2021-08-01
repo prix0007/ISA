@@ -50,7 +50,6 @@ export class Home extends Component {
 
     fetchContracts = async () => {
         const {
-            web3,
             factoryContract
         } = this.state;
         console.log("fetching")
@@ -72,7 +71,7 @@ export class Home extends Component {
                     <div className="media">
                         <div className="media-left">
                             <figure className="image is-48x48">
-                                <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image" />
+                                <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder" />
                             </figure>
                         </div>
                         <div className="media-content">
@@ -81,7 +80,7 @@ export class Home extends Component {
                     </div>
             
                     <div className="content">
-                        View this Contract on Rinkeby Network. <a target="_blank" href={`https://rinkeby.etherscan.io/address/${address}`}>Go</a>
+                        View this Contract on Rinkeby Network. <a target="_blank" href={`https://rinkeby.etherscan.io/address/${address}`}  rel="noopener noreferrer">Go</a>
                         
                         <br />
                         Goto Details <Link to={`/contract/${address}`}>Go</Link>
@@ -99,7 +98,7 @@ export class Home extends Component {
         return (
             <div className="container">
                 <h1 className="title is-5">All ISA Contracts deployed from this factory</h1>
-                <h1 className="title is-6">This Contract Factory Address on Rinkeby. <a target="_blank" href={`https://rinkeby.etherscan.io/address/${factoryAddress}`}>{factoryAddress}</a></h1>
+                <h1 className="title is-6">This Contract Factory Address on Rinkeby. <a target="_blank" href={`https://rinkeby.etherscan.io/address/${factoryAddress}`}  rel="noopener noreferrer">{factoryAddress}</a></h1>
                 {
                     this.renderContracts()
                 }

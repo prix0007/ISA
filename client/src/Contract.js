@@ -232,7 +232,6 @@ class App extends Component {
     const {
       accounts,
       contract,
-      web3
     } = this.state;
 
     if(contract ){
@@ -251,7 +250,7 @@ class App extends Component {
     const {
       accounts,
       contract,
-      web3
+      
     } = this.state;
 
     if(contract ){
@@ -267,7 +266,7 @@ class App extends Component {
   }
 
   renderCfa = () => {
-    const times = ["sec", "minute", "hour", "day", "month", "year"];
+    // const times = ["sec", "minute", "hour", "day", "month", "year"];
    
     return (
       <div className="m-5">
@@ -290,7 +289,7 @@ class App extends Component {
     const {
       currentUser,
       cAddresses,
-      web3
+     
     } = this.state;
     const val = document.getElementById("flowRateInput").value;
     let finalVal = val.trim().toLowerCase(); 
@@ -325,8 +324,8 @@ class App extends Component {
   renderInteractions = () => {
     const {
       accounts,
-      contract,
-      currentUser,
+      // contract,
+      // currentUser,
       contractParties
     } = this.state;
 
@@ -532,14 +531,13 @@ class App extends Component {
                 <tbody>
                   {
                     Object.keys(currentContractData).map((key) => {
-                      if(isNaN(key)){
-                        return (
-                          <tr key={key}>
-                            <td>{key}</td>
-                            <td><strong>{currentContractData[key]}</strong></td>
-                          </tr>
-                        );
-                      }
+                      return (
+                        <tr key={key}>
+                          <td>{key}</td>
+                          <td><strong>{currentContractData[key]}</strong></td>
+                        </tr>
+                      );
+                      
                     })  
                   }
                 </tbody>
