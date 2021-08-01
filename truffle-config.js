@@ -58,9 +58,7 @@ module.exports = {
         },
         
       },
-      modelCheckerSettings: {
-        // contains options for SMTChecker
-      }
+     
     }
   }
 };

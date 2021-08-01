@@ -8,6 +8,15 @@ import { countdown } from './common';
 import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import Web3 from 'web3';
 
+import { useParams } from "react-router";
+
+const Mediator = () => {
+  const { contractAddress } = useParams();
+  
+  return <App contractAddress={contractAddress} />;
+}
+
+// DaiX Token
 const ACCEPTED_TOKEN = "0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90";
 class App extends Component {
   state = { 
@@ -36,6 +45,7 @@ class App extends Component {
   };
 
   componentDidMount = async () => {
+    
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -49,11 +59,9 @@ class App extends Component {
       await sf.initialize();
 
       // Get the contract instance.
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = ISA.networks[networkId];
       const instance = new web3.eth.Contract(
         ISA.abi,
-        deployedNetwork && deployedNetwork.address,
+        this.props.contractAddress,
       );
 
       // Set web3, accounts, and contract to the state, and then proceed with an
@@ -63,7 +71,7 @@ class App extends Component {
         sf,
         accounts, 
         contract: instance, 
-        cAddresses: [...this.state.cAddresses, deployedNetwork.address] }, 
+        cAddresses: [...this.state.cAddresses, this.props.contractAddress] }, 
         this.getAllData
       );
     } catch (error) {
@@ -143,13 +151,14 @@ class App extends Component {
         scale: e.target.value
       }); break;
       case "lender": 
-      this.setState({
-        lender: {
-          ...lender,
-          flowRate: this.convertToTime(e.target.value, lender.weiRate)
-        },
-        scale: e.target.value
-      });
+        this.setState({
+          lender: {
+            ...lender,
+            flowRate: this.convertToTime(e.target.value, lender.weiRate)
+          },
+          scale: e.target.value
+        }); break;
+      default: return;
     }
   }
 
@@ -386,9 +395,6 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1 className="title">Hi to the ISA Factory.</h1>
-        <p className="subtitle">Powered by Superfluid, you can now lend money on chain. </p>
-        
         <div className="columns">
           <div className="column is-four-fifths">
             <h2 className="title">ISA</h2>
@@ -589,4 +595,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default Mediator;

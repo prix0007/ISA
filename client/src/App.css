@@ -26,6 +26,11 @@
   align-items: flex-start;
   justify-content: center;
 }
+.border {
+  border: 1px solid #ccc;
+  margin: 10px;
+  padding: 5px;
+}
 
 .row div {
   margin: 10px;
