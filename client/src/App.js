@@ -158,6 +158,161 @@ class App extends Component {
     return date.toLocaleString();
   }
 
+  sendTradeable = async () => {
+    const val = document.getElementById("tradeable").value;
+    if(val.trim() === "") return;
+    const finalVal = val.trim().toLowerCase() === "true" ? true : false; 
+    const {
+      accounts,
+      contract
+    } = this.state;
+
+    if(contract){
+      try{
+        const res = await contract.methods.setTradeable(finalVal).send({from: accounts[0]})
+        console.log(res)
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+  }
+
+  sendPriceSet = async () => {
+    const val = document.getElementById("price").value;
+    const finalVal = val.trim().toLowerCase(); 
+    const {
+      accounts,
+      contract,
+      web3
+    } = this.state;
+
+    if(contract){
+      try{
+        const res = await contract.methods.setTradePrice(web3.utils.toWei(finalVal)).send({from: accounts[0]})
+        console.log(res)
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+  }
+
+  sendLenderChange = async () => {
+    const val = document.getElementById("lender").value;
+    const finalVal = val.trim().toLowerCase(); 
+    const {
+      accounts,
+      contract,
+      web3
+    } = this.state;
+
+    if(contract && web3.utils.isAddress(finalVal)){
+      try{
+        const res = await contract.methods.changeReciever(finalVal).send({from: accounts[0]})
+        console.log(res)
+      } catch (e) {
+        alert(e.message);
+      }
+    } else {
+      alert("Oh ho! Looks like new Address Isn't correct.")
+    }
+  }
+
+  approveInstitute = async () => {
+    
+    const {
+      accounts,
+      contract,
+      web3
+    } = this.state;
+
+    if(contract ){
+      try{
+        const res = await contract.methods.approve().send({from: accounts[0]})
+        console.log(res)
+      } catch (e) {
+        alert(e.message);
+      }
+    } else {
+      alert("Oh ho! Contract isn't Loaded Correctly")
+    }
+  }
+
+  withdrawMoney = async () => {
+    const {
+      accounts,
+      contract,
+      web3
+    } = this.state;
+
+    if(contract ){
+      try{
+        const res = await contract.methods.withdraw().send({from: accounts[0]})
+        console.log(res)
+      } catch (e) {
+        alert(e.message);
+      }
+    } else {
+      alert("Oh ho! Contract isn't Loaded Correctly")
+    }
+  }
+
+  renderCfa = () => {
+    const times = ["sec", "minute", "hour", "day", "month", "year"];
+   
+    return (
+      <div className="m-5">
+        <input className="input is-primary" type="text" placeholder="Enter amount in wei/sec to start flow" id="flowRateInput" />
+        {/* <div class="select" >
+          <select id="timeScale">
+            { 
+              times.map((time, index) => {
+                return <option key={time} value={time} >{time}</option>
+              })
+            }
+          </select>
+        </div> */}
+        <button className="button is-primary" onClick={() => this.startCfa()}>Start Flow</button>
+      </div>
+    )
+  }
+
+  startCfa = async () => {
+    const {
+      currentUser,
+      cAddresses,
+      web3
+    } = this.state;
+    const val = document.getElementById("flowRateInput").value;
+    let finalVal = val.trim().toLowerCase(); 
+    // finalVal = web3.utils.toWei(finalVal);
+    // console.log(finalVal);
+    // const scaleElem = document.getElementById("timeScale");
+    // const scale = scaleElem.options[scaleElem.selectedIndex].value;
+    // console.log(scale);
+    // finalVal = web3.utils.BN(finalVal)
+    // switch(scale) {
+    //   case "sec": finalVal = finalVal;
+    //   case "minute": finalVal = finalVal.div60; break;
+    //   case "hour":  finalVal = finalVal.div(60*60); break;
+    //   case "day": finalVal = finalVal.div(60*60*24); break;
+    //   case "month": finalVal = finalVal.div(60*60*24*30); break;
+    //   case "year": finalVal = finalVal.div(60*60*24*365); break;
+    //   default: finalVal = finalVal;
+    // }
+    // console.log(finalVal);
+    // return
+   
+
+    if(currentUser){
+      await currentUser.flow({
+          recipient: cAddresses[0],
+          flowRate: finalVal
+      });
+    }
+
+  }
+
   renderInteractions = () => {
     const {
       accounts,
@@ -170,12 +325,42 @@ class App extends Component {
 
     if(contractParties){
       switch(accounts[0]){
-        case contractParties['student']: views.push(<p> Hi there, student </p>); break;
-        case contractParties['lender']: views.push(<p> Hi there lender.</p>); break;
-        case contractParties['lender']: views.push(<p> Hi Institute</p>); break;
-        default: console.log('Non Party')
+        case contractParties['student']: 
+          views.push(<p> Hi there, student </p>); 
+          views.push(<div>
+            Things you can do with this contract. 
+            <br /> <hr /> Approve Your Institute to Withdraw <br />
+            <button className="button is-primary" onClick={() => this.approveInstitute()}>Approve Institute</button>
+          </div>)
+          break;
+        case contractParties['lender']: 
+          views.push(<p> Hi there lender.</p>); 
+          views.push(<div>
+            Things you can do with this contract. 
+            <br /> <hr /> Set it Tradeable <br />
+            <input class="input is-primary" type="text" placeholder="Enter true or false" id="tradeable" />
+            <button className="button is-primary" onClick={() => this.sendTradeable()}>Set Tradeable</button>
+            <br /> <hr /> Set a Price for trading <br />
+            <input class="input is-primary" type="text" placeholder="Enter Price in Eth" id="price" />
+            <button className="button is-primary" onClick={() => this.sendPriceSet()}>Set Trading Price</button>
+            <br /> <hr /> Send this contract's lender's right to someone else <br />
+            <input class="input is-primary" type="text" placeholder="Enter an Address 0x..." id="lender" />
+            <button className="button is-primary" onClick={() => this.sendLenderChange()}>Send Lender's Right</button>
+          </div>)
+          break;
+        case contractParties['institute']: 
+          views.push(<p> Hi Institute</p>); 
+          views.push(<div>
+            Things you can do with this contract. 
+            <br /> <hr /> Withdraw Money from this Contract <br />
+            <button className="button is-primary" onClick={() => this.withdrawMoney()}>Withdraw 1 Ether</button>
+          </div>)
+          break;
+        default: views.push(<p>Look like you are not any Party in this contract.</p>)
       }
     }
+
+    views.push(this.renderCfa())
 
     return views
 
