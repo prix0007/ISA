@@ -1,8 +1,9 @@
 
 var ISA = artifacts.require("./ISA.sol");
 
+// TODO: Deployment from truffle is failing (succeeding from remix)
 module.exports = async function(deployer, network, accounts) {
-  console.log("Deployign ISA...")
+  console.log("Deploying ISA...")
   await deployer.deploy(
     ISA, 
     "0xeD5B5b32110c3Ded02a07c8b8e97513FAfb883B6",
@@ -16,5 +17,5 @@ module.exports = async function(deployer, network, accounts) {
     30
   ); 
   const instance = await ISA.deployed();
-  console.log(instance);
+  console.log(instance.address);
 };

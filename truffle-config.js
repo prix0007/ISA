@@ -50,7 +50,17 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "^0.7.0"
+      version:"^0.7.0",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200  // Optimize for how many times you intend to run the code
+        },
+        
+      },
+      modelCheckerSettings: {
+        // contains options for SMTChecker
+      }
     }
   }
 };
