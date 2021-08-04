@@ -1019,6 +1019,11 @@ bufferutil@^4.0.1:
   dependencies:
     node-gyp-build "^4.2.0"
 
+bulma-toast@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/bulma-toast/-/bulma-toast-2.3.1.tgz#50eb3cd4b6c497ffe28c8c22d4c6cd0b11d53871"
+  integrity sha512-jebDGFJLvzdFd7L8fuYDYJq2DLgzV3XGQY0du3sufZREhZuQ1nNzRIBUHRQZ4NmVkOou8emgSIqhOYE4Qs4O+g==
+
 bytes@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.0.tgz#f6cf7933a360e0588fa9fde85651cdc7f805d1f6"

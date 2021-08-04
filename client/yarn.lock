@@ -3043,6 +3043,11 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
+bulma-toast@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/bulma-toast/-/bulma-toast-2.3.1.tgz#50eb3cd4b6c497ffe28c8c22d4c6cd0b11d53871"
+  integrity sha512-jebDGFJLvzdFd7L8fuYDYJq2DLgzV3XGQY0du3sufZREhZuQ1nNzRIBUHRQZ4NmVkOou8emgSIqhOYE4Qs4O+g==
+
 bytes@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.0.0.tgz#d32815404d689699f85a4ea4fa8755dd13a96048"
