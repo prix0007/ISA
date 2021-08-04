@@ -5,7 +5,7 @@ import getWeb3 from './getWeb3';
 import { Link } from 'react-router-dom';
 
 import ISAFactory from './contracts/ISAFactory.json';
-
+import Refresh from './Refresh';
 // const FACTORY_ADDRESS = "0x4e1e0024C675B19d157e4Ae7aFf8847d20d36941";
 
 export class Home extends Component {
@@ -13,13 +13,12 @@ export class Home extends Component {
         web3: null,
         accounts: null, 
         factoryContract: null,
-        contracts: ["0x2DF7E517453976117AA176b03124b4d1B0fC55eb"], 
+        contracts: [], 
         factoryAddress: "" 
     };
 
-    
-
     componentDidMount = async () => {
+        
         try {
         // Get network provider and web3 instance.
         const web3 = await getWeb3();
@@ -66,7 +65,7 @@ export class Home extends Component {
         const {contracts} = this.state;
         const UIItems = contracts.map((address) => {
           return (
-            <div className="card m-3">
+            <div className="card m-3 is-one-fifth">
                 <div className="card-content">
                     <div className="media">
                         <div className="media-left">
@@ -93,14 +92,17 @@ export class Home extends Component {
       }
     render() {
         const {
-            factoryAddress
+            factoryAddress,
+            contracts
         } = this.state;
         return (
             <div className="container">
                 <h1 className="title is-5">All ISA Contracts deployed from this factory</h1>
                 <h1 className="title is-6">This Contract Factory Address on Rinkeby. <a target="_blank" href={`https://rinkeby.etherscan.io/address/${factoryAddress}`}  rel="noopener noreferrer">{factoryAddress}</a></h1>
                 {
-                    this.renderContracts()
+                    contracts.length > 0 ?
+                    this.renderContracts() :
+                    <Refresh />
                 }
             </div>
         )

@@ -7,6 +7,8 @@ import ISAFactory from './contracts/ISAFactory.json';
 
 import { toast as superToast } from 'bulma-toast';
 
+import Refresh from './Refresh';
+
 const initError = {
     ehost: "",
     ecfa: "",
@@ -44,8 +46,10 @@ class NewCampaign extends Component {
         loading: false
     };
 
-  componentDidMount = async () => {
+    
 
+  componentDidMount = async () => {
+    
     
     try {
         // Get network provider and web3 instance.
@@ -243,8 +247,9 @@ class NewCampaign extends Component {
     }
 
     render() {
-        const { error, loading } = this.state;
+        const { error, loading, factoryContract } = this.state;
         return (
+            factoryContract ? 
             <div>
                 <div>
                     <h5>These default contract addresses for host, cfa and acceptedToken you can find on Superfluid Network Directory. </h5>
@@ -381,7 +386,8 @@ class NewCampaign extends Component {
                     <progress class="progress is-small is-primary" max="100"></progress> : 
                     <button className="button mt-3 is-primary" onClick={() => this.handleSubmit()}>Create ISA</button>
                 }
-            </div>
+            </div> :
+            <Refresh />
         );
   }
 };

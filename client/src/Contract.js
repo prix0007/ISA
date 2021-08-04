@@ -9,6 +9,7 @@ import SuperfluidSDK from '@superfluid-finance/js-sdk';
 import Web3 from 'web3';
 
 import { useParams } from "react-router";
+import Refresh from "./Refresh";
 
 const Mediator = () => {
   const { contractAddress } = useParams();
@@ -41,7 +42,8 @@ class App extends Component {
     contractParties: null, 
     contractRates: null,
     sf: null,
-    currentUser: null
+    currentUser: null,
+    isRefreshButton: false,
   };
 
   componentDidMount = async () => {
@@ -270,7 +272,8 @@ class App extends Component {
    
     return (
       <div className="m-5">
-        <input className="input is-primary" type="text" placeholder="Enter amount in wei/sec to start flow" id="flowRateInput" />
+        <p>Send a fDAIx flow to this contract.</p>
+        <input className="input is-primary m-1" type="text" placeholder="Enter amount in wei/sec to start flow" id="flowRateInput" />
         {/* <div class="select" >
           <select id="timeScale">
             { 
@@ -280,7 +283,7 @@ class App extends Component {
             }
           </select>
         </div> */}
-        <button className="button is-primary" onClick={() => this.startCfa()}>Start Flow</button>
+        <button className="button is-primary m-1" onClick={() => this.startCfa()}>Start Flow</button>
       </div>
     )
   }
@@ -338,7 +341,7 @@ class App extends Component {
           views.push(<div>
             Things you can do with this contract. 
             <br /> <hr /> Approve Your Institute to Withdraw <br />
-            <button className="button is-primary" onClick={() => this.approveInstitute()}>Approve Institute</button>
+            <button className="button is-primary m-1" onClick={() => this.approveInstitute()}>Approve Institute</button>
           </div>)
           break;
         case contractParties['lender']: 
@@ -346,14 +349,14 @@ class App extends Component {
           views.push(<div>
             Things you can do with this contract. 
             <br /> <hr /> Set it Tradeable <br />
-            <input class="input is-primary" type="text" placeholder="Enter true or false" id="tradeable" />
-            <button className="button is-primary" onClick={() => this.sendTradeable()}>Set Tradeable</button>
+            <input class="input is-primary m-1" type="text" placeholder="Enter true or false" id="tradeable" />
+            <button className="button is-primary m-1" onClick={() => this.sendTradeable()}>Set Tradeable</button>
             <br /> <hr /> Set a Price for trading <br />
-            <input class="input is-primary" type="text" placeholder="Enter Price in Eth" id="price" />
-            <button className="button is-primary" onClick={() => this.sendPriceSet()}>Set Trading Price</button>
+            <input class="input is-primary m-1" type="text" placeholder="Enter Price in Eth" id="price" />
+            <button className="button is-primary m-1" onClick={() => this.sendPriceSet()}>Set Trading Price</button>
             <br /> <hr /> Send this contract's lender's right to someone else <br />
-            <input class="input is-primary" type="text" placeholder="Enter an Address 0x..." id="lender" />
-            <button className="button is-primary" onClick={() => this.sendLenderChange()}>Send Lender's Right</button>
+            <input class="input is-primary m-1" type="text" placeholder="Enter an Address 0x..." id="lender" />
+            <button className="button is-primary m-1" onClick={() => this.sendLenderChange()}>Send Lender's Right</button>
           </div>)
           break;
         case contractParties['institute']: 
@@ -361,7 +364,7 @@ class App extends Component {
           views.push(<div>
             Things you can do with this contract. 
             <br /> <hr /> Withdraw Money from this Contract <br />
-            <button className="button is-primary" onClick={() => this.withdrawMoney()}>Withdraw 1 Ether</button>
+            <button className="button is-primary m-1" onClick={() => this.withdrawMoney()}>Withdraw 1 Ether</button>
           </div>)
           break;
         default: views.push(<p>Look like you are not any Party in this contract.</p>)
@@ -373,6 +376,8 @@ class App extends Component {
     return views
 
   }
+
+  
 
   render() {
 
@@ -390,7 +395,14 @@ class App extends Component {
     } = this.state;
 
     if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
+      
+      return (
+        <div>
+          Loading Web3, accounts, and contract...
+          <progress className="progress is-small is-primary" max="100"></progress>
+          { <Refresh />}
+        </div> 
+      );
     }
     return (
       <div className="App">
@@ -398,7 +410,12 @@ class App extends Component {
           <div className="column is-four-fifths">
             <h2 className="title">ISA</h2>
             <p className="subtitle">
-              Details for Contract Address: <strong>{cAddresses.length > 0 && cAddresses[0]}</strong>
+              Details for Contract Address: 
+              {cAddresses.length > 0 ?
+                <a href={`https://rinkeby.etherscan.io/address/${cAddresses[0]}`}>
+                  <strong>{cAddresses[0]}</strong>
+                </a> : <p>Contract not Loaded Yet</p>
+              } 
             </p>
             {contractRates ? <div className="container">
               <div className="row">
@@ -549,44 +566,45 @@ class App extends Component {
             {
               this.renderInteractions()
             }
+             <div className="row">
+            <div>
+                <p>Student Flow Rate: </p>
+              </div>
+              <div>
+                <select onChange={e => this.handleTimeChange(e, "student")}>
+                  {
+                    times.map((time) => {
+                      return <option key={time}>{time}</option>
+                    })
+                  }
+                </select>
+              </div>
+              <div>
+                <p>{`${student.flowRate.toFixed(8)} dai/${student.scale}` }</p>
+              </div>
+            </div>
+
+            <div className="row">
+              <div>
+                <p>Lender Flow Rate: </p>
+              </div>
+              <div>
+                <select onChange={e => this.handleTimeChange(e, "lender")}>
+                  {
+                    times.map((time) => {
+                      return <option key={time}>{time}</option>
+                    })
+                  }
+                </select>
+              </div>
+              <div>
+                <p>{`${lender.flowRate.toFixed(8)} dai/${lender.scale}` }</p>
+              </div>
+            </div>      
           </div>
         </div>
 
-        <div className="row">
-          <div>
-            <p>Student Flow Rate: </p>
-          </div>
-          <div>
-            <select onChange={e => this.handleTimeChange(e, "student")}>
-              {
-                times.map((time) => {
-                  return <option key={time}>{time}</option>
-                })
-              }
-            </select>
-          </div>
-          <div>
-            <p>{`${student.flowRate.toFixed(8)} dai/${student.scale}` }</p>
-          </div>
-        </div>
-
-        <div className="row">
-          <div>
-            <p>Lender Flow Rate: </p>
-          </div>
-          <div>
-            <select onChange={e => this.handleTimeChange(e, "lender")}>
-              {
-                times.map((time) => {
-                  return <option key={time}>{time}</option>
-                })
-              }
-            </select>
-          </div>
-          <div>
-            <p>{`${lender.flowRate.toFixed(8)} dai/${lender.scale}` }</p>
-          </div>
-        </div>      
+       
         
       </div>
     );
