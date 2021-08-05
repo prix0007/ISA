@@ -11,6 +11,8 @@ import Web3 from 'web3';
 import { useParams } from "react-router";
 import Refresh from "./Refresh";
 
+import { toast } from 'bulma-toast';
+
 const Mediator = () => {
   const { contractAddress } = useParams();
   
@@ -43,6 +45,7 @@ class App extends Component {
     contractRates: null,
     sf: null,
     currentUser: null,
+    currentUserSFDetails: null,
     isRefreshButton: false,
   };
 
@@ -120,7 +123,20 @@ class App extends Component {
         token: ACCEPTED_TOKEN
       })
       this.setState({currentUser})
+      this.getSfDetails();
+      
     }
+  }
+
+  renderToast = (msg, type) => {
+    toast({
+      message: msg,
+      type: type,
+      dismissible: true,
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 2000
+    })
   }
 
   convertWeiToDai = (wei) => {
@@ -182,8 +198,9 @@ class App extends Component {
       try{
         const res = await contract.methods.setTradeable(finalVal).send({from: accounts[0]})
         console.log(res)
+        this.renderToast(`Successful Transaction: Txn Hash ${res.transactionHash}`, "is-success")
       } catch (e) {
-        alert(e.message);
+        this.renderToast(e.message, "is-danger");
       }
     }
 
@@ -202,8 +219,9 @@ class App extends Component {
       try{
         const res = await contract.methods.setTradePrice(web3.utils.toWei(finalVal)).send({from: accounts[0]})
         console.log(res)
+        this.renderToast(`Successful Transaction: Txn Hash ${res.transactionHash}`, "is-success")
       } catch (e) {
-        alert(e.message);
+        this.renderToast(e.message, "is-danger");
       }
     }
   }
@@ -221,11 +239,12 @@ class App extends Component {
       try{
         const res = await contract.methods.changeReciever(finalVal).send({from: accounts[0]})
         console.log(res)
+        this.renderToast(`Successful Transaction: Txn Hash ${res.transactionHash}`, "is-success");
       } catch (e) {
-        alert(e.message);
+        this.renderToast(e.message, "is-danger");
       }
     } else {
-      alert("Oh ho! Looks like new Address Isn't correct.")
+      this.renderToast("Oh,  ho! Looks like new Address Isn't correct.","is-danger")
     }
   }
 
@@ -240,11 +259,12 @@ class App extends Component {
       try{
         const res = await contract.methods.approve().send({from: accounts[0]})
         console.log(res)
+        this.renderToast(`Successful Transaction: Txn Hash ${res.transactionHash}`, "is-success");
       } catch (e) {
-        alert(e.message);
+        this.renderToast(e.message, "is-danger");
       }
     } else {
-      alert("Oh ho! Contract isn't Loaded Correctly")
+      this.renderToast("Oh, ho! Contract isn't Loaded Correctly","is-danger")
     }
   }
 
@@ -259,11 +279,12 @@ class App extends Component {
       try{
         const res = await contract.methods.withdraw().send({from: accounts[0]})
         console.log(res)
+        this.renderToast(`Successful Transaction: Txn Hash ${res.transactionHash}`, "is-success");
       } catch (e) {
-        alert(e.message);
+        this.renderToast(e.message || "Some Error Occured", "is-danger");
       }
     } else {
-      alert("Oh ho! Contract isn't Loaded Correctly")
+      this.renderToast("Oh ho! Contract isn't Loaded Correctly", "is-danger")
     }
   }
 
@@ -286,6 +307,94 @@ class App extends Component {
         <button className="button is-primary m-1" onClick={() => this.startCfa()}>Start Flow</button>
       </div>
     )
+  }
+
+  getSfDetails = async () => {
+    const {
+      currentUser
+    } = this.state;
+    if(currentUser) {
+      const details = await currentUser.details();
+      console.log(details)
+      this.setState({
+        currentUserSFDetails: details
+      })
+    } else {
+      this.renderToast("Error in loading User Superfluid Account.", "is-danger");
+    }
+  }
+
+  renderSfDetails = () => {
+    const {
+      currentUserSFDetails
+    } = this.state;
+    if(currentUserSFDetails){
+      const views = [];
+
+      views.push(
+        <p>{`Your Current CFA Netflow is :${currentUserSFDetails.cfa.netFlow} wei/sec`}</p>
+      )
+
+      views.push(
+        <p className="title is-6">Inflow CFA</p>
+      )
+      currentUserSFDetails.cfa.flows.inFlows.forEach(flowObj => {
+        const { flowRate, receiver, sender} = flowObj;
+        views.push(
+          <div className="border">
+            <p>{`Flowrate: ${flowRate} wei/sec`}</p>
+            <p className="has-text-weight-bold">{`Reciever: ${this.formattedAddress(receiver)}`}</p>
+            <p className="has-text-weight-bold">{`Sender: ${this.formattedAddress(sender)}`}</p>
+            <button className="button is-danger" onClick={() => this.stopCfa(receiver)}>Stop Flow</button>
+          </div>
+        )
+      });
+
+      
+      views.push(
+        <p className="title is-6">Outflows CFA</p>
+      )
+      currentUserSFDetails.cfa.flows.outFlows.forEach(flowObj => {
+          const { flowRate, receiver, sender} = flowObj;
+          views.push(
+            <div className="border">
+              <p>{`Flowrate: ${flowRate} wei/sec`}</p>
+              <p className="has-text-weight-bold">{`Reciever: ${this.formattedAddress(receiver)}`}</p>
+              <p className="has-text-weight-bold">{`Sender: ${this.formattedAddress(sender)}`}</p>
+              <button className="button is-danger" onClick={() => this.stopCfa(receiver)}>Stop Flow</button>
+            </div>
+          )
+      });
+
+      return views;
+
+    } else {
+      this.renderToast("User Superfluid Flows aren't Loaded", "is-danger")
+      return [];
+    }
+  }
+
+  stopCfa = async (receiver) => {
+    const {
+      currentUser,
+    } = this.state;
+
+    if(currentUser){
+      try {
+        const res = await currentUser.flow({
+            recipient: receiver,
+            flowRate: "0"
+        });
+        this.renderToast(`Stream Stopped Successfully. Txn Id: ${res.tx}`, "is-success");
+        console.log(res)
+      } catch (err) {
+        this.renderToast(err.message || "Some Error Occured", "is-danger");
+        console.log(err)
+      }
+    } else {
+      this.renderToast("Current User Superfluid Not Loaded", "is-danger")
+    }
+
   }
 
   startCfa = async () => {
@@ -316,12 +425,21 @@ class App extends Component {
    
 
     if(currentUser){
-      await currentUser.flow({
+      const res = await currentUser.flow({
           recipient: cAddresses[0],
           flowRate: finalVal
       });
+      this.renderToast(`Stream Started Successfully. Txn Id: ${res.tx}`, "is-success");
+      console.log(res)
+      val.innerHtml = ""
+    } else {
+      this.renderToast("Current User Superfluid Not Loaded", "is-danger")
     }
 
+  }
+
+  formattedAddress = (addr) => {
+    return `${addr.substr(0,8)}...${addr.substr(addr.length - 3, addr.length)}`
   }
 
   renderInteractions = () => {
@@ -333,6 +451,10 @@ class App extends Component {
     } = this.state;
 
     let views = [];
+
+    views.push(
+      <p className="has-text-weight-bold">{`Current Active Account: ${this.formattedAddress(accounts[0])}`}</p>
+    )
 
     if(contractParties){
       switch(accounts[0]){
@@ -391,7 +513,8 @@ class App extends Component {
       contractBalances, 
       contractFlows, 
       contractParties, 
-      contractRates
+      contractRates,
+      currentUserSFDetails
     } = this.state;
 
     if (!this.state.web3) {
@@ -404,6 +527,7 @@ class App extends Component {
         </div> 
       );
     }
+    // console.log(this.renderSfDetails());
     return (
       <div className="App">
         <div className="columns">
@@ -412,7 +536,7 @@ class App extends Component {
             <p className="subtitle">
               Details for Contract Address: 
               {cAddresses.length > 0 ?
-                <a href={`https://rinkeby.etherscan.io/address/${cAddresses[0]}`}>
+                <a href={`https://rinkeby.etherscan.io/address/${cAddresses[0]}`} target="_blank" rel="noopener noreferrer">
                   <strong>{cAddresses[0]}</strong>
                 </a> : <p>Contract not Loaded Yet</p>
               } 
@@ -566,7 +690,13 @@ class App extends Component {
             {
               this.renderInteractions()
             }
-             <div className="row">
+            <div className="border">
+              { currentUserSFDetails && <p className="title is-4"> Your Current Flows Details </p>}
+              {
+                currentUserSFDetails && this.renderSfDetails().map(element => element)
+              }
+            </div>
+            <div className="row">
             <div>
                 <p>Student Flow Rate: </p>
               </div>
